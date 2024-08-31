@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS PRO Chat Box</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #0e0e0e;
+            font-family: 'Orbitron', sans-serif;
+            color: #e0e0e0;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+        .chat-container {
+            width: 360px;
+            height: 500px;
+            border: 2px solid #00ff99;
+            border-radius: 12px;
+            background: #1c1c1c;
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 2px solid #00ff99;
+            background: #0a0a0a;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            text-align: center;
+            font-size: 18px;
+            color: #00ff99;
+            text-shadow: 0 0 5px rgba(0, 255, 153, 0.8);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            border-bottom: 2px solid #00ff99;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+        }
+        
+        .message p {
+            margin: 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 255, 153, 0.3);
+        }
+        
+        .message.sent p {
+            background: #1c1c1c;
+            text-align: right;
+        }
+        
+        .chat-input {
+            padding: 10px;
+            border-top: 2px solid #00ff99;
+            background: #0a0a0a;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            display: flex;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            box-shadow: 0 0 5px rgba(0, 255, 153, 0.3);
+        }
+        
+        .chat-input button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00ff99;
+            color: #0e0e0e;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(0, 255, 153, 0.3);
+        }
+        
+        .chat-input button:hover {
+            background: #00cc99;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">JARVIS PRO Chat</div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message">
+                <p>Hello, how can I assist you today?</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('send-button').addEventListener('click', function() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === '') return;  // Prevent empty messages
+
+            // Display user's message
+            const chatMessages = document.getElementById('chat-messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message sent';
+            userMessage.innerHTML = `<p>${userInput}</p>`;
+            chatMessages.appendChild(userMessage);
+
+            // Clear the input field
+            document.getElementById('user-input').value = '';
+
+            // Scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Send the message to the API
+            fetch('https://f73511286a47b62a4e588721bceb3f4f.serveo.net/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display bot's response
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message';
+                botMessage.innerHTML = `<p>${data.response}</p>`;
+                chatMessages.appendChild(botMessage);
+
+                // Scroll to the bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message';
+                errorMessage.innerHTML = `<p>Sorry, something went wrong. Please try again later.</p>`;
+                chatMessages.appendChild(errorMessage);
+            });
+        });
+
+        // Send the message when pressing Enter key
+        document.getElementById('user-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('send-button').click();
+            }
+        });
+    </script>
+</body>
+
+</html>
